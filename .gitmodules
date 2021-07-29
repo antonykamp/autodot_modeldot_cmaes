@@ -1,0 +1,6 @@
+[submodule "AutoDot"]
+	path = AutoDot
+	url = git@github.com:antonykamp/AutoDot.git
+[submodule "ModelDot"]
+	path = ModelDot
+	url = git@github.com:antonykamp/ModelDot.git
