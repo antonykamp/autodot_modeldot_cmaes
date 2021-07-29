@@ -12,7 +12,7 @@ def run_tests():
     prefix = str(date.today())
     Path(prefix).mkdir(exist_ok=True)
     Path(prefix + "/errors").mkdir(exist_ok=True)
-    num_iterations = [40, 60, 80, 100, 120, 140]
+    num_iterations = [40, 60, 80, 100, 120, 140, 160]
     paper, cmaes_stages, cmaes_prop = collect_data(max(num_iterations))
     for num_iter in num_iterations:
         compare_sampler(
