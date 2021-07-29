@@ -1,0 +1,52 @@
+{ "device" : "all_gates_device",
+
+  "all_gates_device" : {
+  "DAC": {
+    "c0": 0,
+    "c1": 0,
+    "c2": 0,
+    "c3": 0,
+    "c4": 0,
+    "c5": 0,
+    "c6": 0,
+    "c7": 0,
+    "c8": 0,
+    "c9": 0,
+    "c10": 0,
+    "c11": 0,
+    "c12": 0,
+    "c13": 0
+    },
+  "lx": 2340,
+  "ly": 1500,
+  "2DEG_depth": 110,
+  "donor_height": 40,
+  "path": "AF",
+  "disorder": 1184.0,
+  "pot_scale": 4
+  },
+
+  "disorder_device" : {
+
+  "DAC": {
+    "c0": 0,
+    "c1": 0,
+    "c2": 0,
+    "c3": 0,
+    "c4": 0,
+    "c5": 0,
+    "c6": 0,
+    "c7": 0
+    },
+  "lx": 2423,
+  "ly": 1417,
+  "2DEG_depth": 110,
+  "donor_height": 40,
+  "path": "AF",
+  "disorder": 1184.0,
+  "pot_scale": 4 
+  },
+  "GPU": "6",
+  "file_path":"/home/moon/recovered-20210617/Model_dot_Autodot_tuning/Autodot_Modeldot_repo/ModelDot/",
+  "save_path":"/home/moon/recovered-20210617/Model_dot_Autodot_tuning/Autodot_Modeldot_repo/ModelDot/"
+}
