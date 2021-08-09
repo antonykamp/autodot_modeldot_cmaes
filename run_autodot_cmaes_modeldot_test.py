@@ -72,12 +72,13 @@ def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
 def save_tuning(**kwargs):
     data = np.array([[]])
     i = -1
+    prefix = str(date.today())
     while len(data) != 100:
         i = i + 1
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
-            f = open("errors/{}_{}.txt".format(str(kwargs), i), "w")
+            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs), i), "w")
             f.write(str(err))
             f.close()
             continue
