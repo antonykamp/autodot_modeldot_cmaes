@@ -4,15 +4,15 @@ import json
 import numpy as np
 from math import exp
 import matplotlib.pyplot as plt
-
+'''
 # Define path to modeldot files
-fp = open('ModelDot/Demo/parameters.json', 'r')
+fp = open('parameters.json', 'r')
 parameters = json.load(fp)
 fp.close()
 f_path = parameters['file_path']
 
 sys.path.insert(0, f_path)
-
+'''
 from ModelDot import ModelDot
 intro = ModelDot.introduction()
 
