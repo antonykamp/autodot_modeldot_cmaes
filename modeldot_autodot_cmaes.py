@@ -201,7 +201,7 @@ def tune_with_modeldot(num_iteration, sampler, score_function="score_nothing", p
         },
 
         "gpc": {
-        "   gpc_start": 10,
+            "gpc_start": 10,
             "d_tooclose": 20.0,
             "gpc_on": True,
             "gpc_list": [True, True, False],
