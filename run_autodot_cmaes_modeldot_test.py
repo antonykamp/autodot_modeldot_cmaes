@@ -4,6 +4,7 @@ from datetime import date
 from statistics import stdev
 from pathlib import Path
 import numpy as np
+import traceback
 import matplotlib
 matplotlib.use('Agg')
 
@@ -35,13 +36,6 @@ def collect_data(num_iterations, popsize=10):
 
 def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
     prefix = str(date.today())
-
-    np.savetxt("{}/paper_{}.csv".format(prefix, num_iterations),
-               paper, delimiter=",", fmt="%i")
-    np.savetxt("{}/cmaes_stages_{}.csv".format(prefix, num_iterations),
-               cmaes_stages, delimiter=",", fmt="%i")
-    np.savetxt("{}/cmaes_prop_{}.csv".format(prefix, num_iterations),
-               cmaes_prop, delimiter=",", fmt="%i")
 
     paper_avg = evaluate_average(paper)
     cmaes_stages_avg = evaluate_average(cmaes_stages)
@@ -75,11 +69,13 @@ def save_tuning(**kwargs):
     prefix = str(date.today())
     while len(data) != 100:
         i = i + 1
+        print("! ! ! ! ! ! ! ! ! {}-iter{}/100 ! ! ! ! ! ! ! !".format(kwargs["sampler"], i))
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
             f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs), i), "w")
             f.write(str(err))
+            f.write(str(traceback.format_exc()))
             f.close()
             continue
 
@@ -88,6 +84,12 @@ def save_tuning(**kwargs):
         else:
             data = np.concatenate(
                 (data, np.array([res["conditional_idx"]])))
+        
+        if i%10 == 0:
+            # save intermediate status
+            np.savetxt("{}/{}.csv".format(prefix, kwargs["sampler"]),
+               data, delimiter=",", fmt="%i")
+
     return data
 
 
