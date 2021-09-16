@@ -144,7 +144,7 @@ def score_propabilities(invest_results, config):
     return -(sum(high_trace)/len(high_trace))
 
 
-def tune_with_modeldot(num_iteration, sampler, score_function="score_nothing", popsize = 11):
+def tune_with_modeldot(num_iteration, sampler, score_function="score_nothing", popsize = 10):
     if score_function == "score_propabilities":
         score_function = score_propabilities
 

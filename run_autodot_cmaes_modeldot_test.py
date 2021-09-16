@@ -23,11 +23,11 @@ def run_tests():
 
 
 def collect_data(num_iterations, popsize=10):
-    paper = save_tuning(num_iteration=num_iterations, sampler="Paper_sampler")
-    cmaes_stages = save_tuning(num_iteration=num_iterations,
+    cmaes_stages = save_tuning(num_iteration=int(num_iterations/10),
                                sampler="CMAES_sampler",
                                score_function="mock_count_stages")
-    cmaes_prop = save_tuning(num_iteration=num_iterations,
+    paper = save_tuning(num_iteration=num_iterations, sampler="Paper_sampler")
+    cmaes_prop = save_tuning(num_iteration=int(num_iterations/10),
                              sampler="CMAES_sampler",
                              score_function="score_propabilities")
 
@@ -69,11 +69,11 @@ def save_tuning(**kwargs):
     prefix = str(date.today())
     while len(data) != 100:
         i = i + 1
-        print("! ! ! ! ! ! ! ! ! {}-iter{}/100 ! ! ! ! ! ! ! !".format(kwargs["sampler"], i))
+        print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(kwargs["sampler"], i, len(data)))
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
-            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs), i), "w")
+            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs).replace(":",""), i), "w")
             f.write(str(err))
             f.write(str(traceback.format_exc()))
             f.close()
