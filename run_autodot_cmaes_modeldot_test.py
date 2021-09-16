@@ -23,10 +23,10 @@ def run_tests():
 
 
 def collect_data(num_iterations, popsize=10):
+    paper = save_tuning(num_iteration=num_iterations, sampler="Paper_sampler")
     cmaes_stages = save_tuning(num_iteration=int(num_iterations/10),
                                sampler="CMAES_sampler",
                                score_function="mock_count_stages")
-    paper = save_tuning(num_iteration=num_iterations, sampler="Paper_sampler")
     cmaes_prop = save_tuning(num_iteration=int(num_iterations/10),
                              sampler="CMAES_sampler",
                              score_function="score_propabilities")
