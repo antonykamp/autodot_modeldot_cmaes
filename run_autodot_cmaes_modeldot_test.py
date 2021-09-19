@@ -73,22 +73,19 @@ def save_tuning(**kwargs):
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
-            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs).replace(":",""), i), "w")
+            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
             f.write(str(err))
             f.write(str(traceback.format_exc()))
             f.close()
-            continue
-
-        if data.size == 0:
-            data = np.array([res["conditional_idx"]])
         else:
-            data = np.concatenate(
-                (data, np.array([res["conditional_idx"]])))
-        
-        if i%10 == 0:
+            if data.size == 0:
+                data = np.array([res["conditional_idx"]])
+            else:
+                data = np.concatenate(
+                    (data, np.array([res["conditional_idx"]])))
             # save intermediate status
             np.savetxt("{}/{}.csv".format(prefix, kwargs["sampler"]),
-               data, delimiter=",", fmt="%i")
+                       data, delimiter=",", fmt="%i")
 
     return data
 
