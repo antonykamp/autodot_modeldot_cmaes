@@ -139,8 +139,8 @@ def any_true(trace, minc, maxc, configs, **kwags):
 
 
 def score_propabilities(invest_results, config):
-    trace_passed, _, _ = invest_results['extra_measure'][3]
-    high_trace = [exp(t) for t in trace_passed if t >= 0.5]
+    _, _, _, trace_passed = invest_results['extra_measure'][0]
+    high_trace = [t for t in trace_passed if t >= 0.5]
     return -(sum(high_trace)/len(high_trace))
 
 
