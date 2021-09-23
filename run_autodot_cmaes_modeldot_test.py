@@ -9,6 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 DATE = str(date.today())
 
+
 def run_tests():
     Path(DATE).mkdir(exist_ok=True)
     Path(DATE + "/errors").mkdir(exist_ok=True)
@@ -62,6 +63,10 @@ def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
 
 def save_tuning(**kwargs):
     data = np.array([[]])
+    filename = "{}/{}{}.csv".format(DATE,kwargs["sampler"], kwargs.get("score_function", ""))
+    if Path(filename).exists():
+        data = np.genfromtxt(filename, delimiter=',', dtype="i")
+
     i = -1
     while len(data) != 100:
         i = i + 1
@@ -80,9 +85,7 @@ def save_tuning(**kwargs):
                 data = np.concatenate(
                     (data, np.array([res["conditional_idx"]])))
             # save intermediate status
-            np.savetxt("{}/{}.csv".format(DATE, kwargs["sampler"]),
-                       data, delimiter=",", fmt="%i")
-
+            np.savetxt(filename, data, delimiter=",", fmt="%i")
     return data
 
 
