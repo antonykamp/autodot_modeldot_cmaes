@@ -7,12 +7,11 @@ import numpy as np
 import traceback
 import matplotlib
 matplotlib.use('Agg')
-
+DATE = str(date.today())
 
 def run_tests():
-    prefix = str(date.today())
-    Path(prefix).mkdir(exist_ok=True)
-    Path(prefix + "/errors").mkdir(exist_ok=True)
+    Path(DATE).mkdir(exist_ok=True)
+    Path(DATE + "/errors").mkdir(exist_ok=True)
     num_iterations = [40, 60, 80, 100, 120, 140, 160]
     paper, cmaes_stages, cmaes_prop = collect_data(max(num_iterations))
     for num_iter in num_iterations:
@@ -35,8 +34,6 @@ def collect_data(num_iterations, popsize=10):
 
 
 def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
-    prefix = str(date.today())
-
     paper_avg = evaluate_average(paper)
     cmaes_stages_avg = evaluate_average(cmaes_stages)
     cmaes_prop_avg = evaluate_average(cmaes_prop)
@@ -46,34 +43,33 @@ def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
               "Average number of points",
               "Average number of points [{} iterations]".format(
                   num_iterations),
-              "{}/num_points_{}.png".format(prefix,
+              "{}/num_points_{}.png".format(DATE,
                                             num_iterations))
 
     paper_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
-        paper, "{}/paper_{}_passed_to_eval.csv".format(prefix, num_iterations)))
+        paper, "{}/paper_{}_passed_to_eval.csv".format(DATE, num_iterations)))
     cmaes_stages_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
-        cmaes_stages, "{}/cmaes_stages_{}_passed_to_eval.csv".format(prefix, num_iterations)))
+        cmaes_stages, "{}/cmaes_stages_{}_passed_to_eval.csv".format(DATE, num_iterations)))
     cmaes_prop_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
-        cmaes_prop, "{}/cmaes_prop_{}_passed_to_eval.csv".format(prefix, num_iterations)))
+        cmaes_prop, "{}/cmaes_prop_{}_passed_to_eval.csv".format(DATE, num_iterations)))
 
     plot_data(paper_passed_to_eval, cmaes_stages_passed_to_eval,
               cmaes_prop_passed_to_eval, "Percentage of passed points",
               "Percentage of passed points [{} iterations]".format(
                   num_iterations),
-              "{}/percentage_passed_{}.png".format(prefix, num_iterations))
+              "{}/percentage_passed_{}.png".format(DATE, num_iterations))
 
 
 def save_tuning(**kwargs):
     data = np.array([[]])
     i = -1
-    prefix = str(date.today())
     while len(data) != 100:
         i = i + 1
         print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(kwargs["sampler"], i, len(data)))
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
-            f = open(prefix+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
+            f = open(DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
             f.write(str(err))
             f.write(str(traceback.format_exc()))
             f.close()
@@ -84,7 +80,7 @@ def save_tuning(**kwargs):
                 data = np.concatenate(
                     (data, np.array([res["conditional_idx"]])))
             # save intermediate status
-            np.savetxt("{}/{}.csv".format(prefix, kwargs["sampler"]),
+            np.savetxt("{}/{}.csv".format(DATE, kwargs["sampler"]),
                        data, delimiter=",", fmt="%i")
 
     return data
