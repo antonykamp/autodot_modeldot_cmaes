@@ -138,15 +138,7 @@ def any_true(trace, minc, maxc, configs, **kwags):
     return passed, passed, None
 
 
-def score_propabilities(invest_results, config):
-    _, _, _, trace_passed = invest_results['extra_measure'][0]
-    high_trace = [t for t in trace_passed if t >= 0.5]
-    return -(sum(high_trace)/len(high_trace))
-
-
 def tune_with_modeldot(num_iteration, sampler, score_function="score_nothing", popsize = 10):
-    if score_function == "score_propabilities":
-        score_function = score_propabilities
 
     template_config = {
         "plunger_gates": [1, 2],

@@ -8,18 +8,19 @@ import traceback
 import matplotlib
 matplotlib.use('Agg')
 DATE = str(date.today())
+NUM_ITERATION = [40, 60, 80, 100, 120, 140, 160]
 
 
 def run_tests():
     Path(DATE).mkdir(exist_ok=True)
     Path(DATE + "/errors").mkdir(exist_ok=True)
-    num_iterations = [40, 60, 80, 100, 120, 140, 160]
-    paper, cmaes_stages, cmaes_prop = collect_data(max(num_iterations))
-    for num_iter in num_iterations:
-        compare_sampler(
-            num_iter, select_first_n_values(paper, num_iter),
-            select_first_n_values(cmaes_stages, num_iter),
-            select_first_n_values(cmaes_prop, num_iter))
+    paper, cmaes_stages = collect_data(max(NUM_ITERATION))
+    comp = [compare_sampler(num_iter,
+                            select_first_n_values(paper, num_iter),
+                            select_first_n_values(cmaes_stages, num_iter))
+            for num_iter in NUM_ITERATION]
+
+    compare_iterations(comp)
 
 
 def collect_data(num_iterations, popsize=10):
@@ -27,54 +28,51 @@ def collect_data(num_iterations, popsize=10):
     cmaes_stages = save_tuning(num_iteration=int(num_iterations/10),
                                sampler="CMAES_sampler",
                                score_function="mock_count_stages")
-    cmaes_prop = save_tuning(num_iteration=int(num_iterations/10),
-                             sampler="CMAES_sampler",
-                             score_function="score_propabilities")
 
-    return paper, cmaes_stages, cmaes_prop
+    return paper, cmaes_stages
 
 
-def compare_sampler(num_iterations, paper, cmaes_stages, cmaes_prop):
+def compare_sampler(num_iterations, paper, cmaes_stages):
     paper_avg = evaluate_average(paper)
     cmaes_stages_avg = evaluate_average(cmaes_stages)
-    cmaes_prop_avg = evaluate_average(cmaes_prop)
-    plot_data(paper_avg,
-              cmaes_stages_avg,
-              cmaes_prop_avg,
-              "Average number of points",
-              "Average number of points [{} iterations]".format(
-                  num_iterations),
-              "{}/num_points_{}.png".format(DATE,
-                                            num_iterations))
+    plot_stage_compare(paper_avg,
+                       cmaes_stages_avg,
+                       "Average number of points",
+                       "Average number of points [{} iterations]".format(
+                           num_iterations),
+                       "{}/num_points_{}.png".format(DATE,
+                                                     num_iterations))
 
     paper_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
         paper, "{}/paper_{}_passed_to_eval.csv".format(DATE, num_iterations)))
     cmaes_stages_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
         cmaes_stages, "{}/cmaes_stages_{}_passed_to_eval.csv".format(DATE, num_iterations)))
-    cmaes_prop_passed_to_eval = evaluate_passed_to_eval_average(evaluate_passed_to_eval(
-        cmaes_prop, "{}/cmaes_prop_{}_passed_to_eval.csv".format(DATE, num_iterations)))
 
-    plot_data(paper_passed_to_eval, cmaes_stages_passed_to_eval,
-              cmaes_prop_passed_to_eval, "Percentage of passed points",
-              "Percentage of passed points [{} iterations]".format(
-                  num_iterations),
-              "{}/percentage_passed_{}.png".format(DATE, num_iterations))
+    plot_stage_compare(paper_passed_to_eval, cmaes_stages_passed_to_eval,
+                       "Percentage of passed points",
+                       "Percentage of passed points [{} iterations]".format(
+                           num_iterations),
+                       "{}/percentage_passed_{}.png".format(DATE, num_iterations))
+
+    return {"paper_avg": paper_avg, "paper_passed_to_eval": paper_passed_to_eval, "cmaes_avg": cmaes_stages_avg, "cmaes_passed_to_eval": cmaes_stages_passed_to_eval}
 
 
 def save_tuning(**kwargs):
     data = np.array([[]])
-    filename = "{}/{}{}.csv".format(DATE,kwargs["sampler"], kwargs.get("score_function", ""))
+    filename = "{}/{}{}.csv".format(DATE,
+                                    kwargs["sampler"], kwargs.get("score_function", ""))
     if Path(filename).exists():
-        data = np.genfromtxt(filename, delimiter=',', dtype="i")
-
+        data = np.loadtxt(filename, delimiter=';', dtype="i", ndmin=2)
     i = -1
     while len(data) != 100:
         i = i + 1
-        print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(kwargs["sampler"], i, len(data)))
+        print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(
+            kwargs["sampler"], i, len(data)))
         try:
             res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
-            f = open(DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
+            f = open(
+                DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
             f.write(str(err))
             f.write(str(traceback.format_exc()))
             f.close()
@@ -154,10 +152,50 @@ def evaluate_passed_to_eval_average(data):
     return average, stdevi
 
 
-def plot_data(paper, cmaes_stages, cmaes_prop, y_label, title, ex_file):
+def plot_stage_compare(paper, cmaes_stages, y_label, title, ex_file):
+    num_stages = len(paper[0])
+    xticks = range(num_stages)
+    xticklabels = ["stage {}".format(s) for s in xticks]
+    plot_data(paper, cmaes_stages, y_label,
+              title, xticks, xticklabels, ex_file)
+
+
+def compare_iterations(comp):
+    paper_avg = [it["paper_avg"] for it in comp]
+    cmaes_avg = [it["cmaes_avg"] for it in comp]
+    num_stages = len(paper_avg[0][0])
+
+    for stage in range(num_stages):
+        paper = [p[0][stage] for p in paper_avg], [p[1][stage]
+                                                   for p in paper_avg]
+        cmaes = [c[0][stage] for c in cmaes_avg], [c[1][stage]
+                                                   for c in cmaes_avg]
+        plot_iteration_compare(paper, cmaes, "Average number of points", "Average number of points (stage {})".format(
+            stage), "{}/num_points_{}.png".format(DATE, stage))
+
+    paper_passed_to_eval = [it["paper_passed_to_eval"] for it in comp]
+    cmaes_passed_to_eval = [it["cmaes_passed_to_eval"] for it in comp]
+
+    for stage in range(num_stages):
+        paper = [p[0][stage] for p in paper_passed_to_eval], [p[1][stage]
+                                                   for p in paper_passed_to_eval]
+        cmaes = [c[0][stage] for c in cmaes_passed_to_eval], [c[1][stage]
+                                                   for c in cmaes_passed_to_eval]
+        plot_iteration_compare(paper, cmaes, "Percentage of passed points", "Percentage of passed points (stage {})".format(
+            stage), "{}/passed_points_{}.png".format(DATE, stage))
+
+
+def plot_iteration_compare(paper, cmaes_stages, y_label, title, ex_file):
+    num_iter = len(NUM_ITERATION)
+    xticks = np.arange(num_iter)
+    xticklabels = ["{} iter".format(it) for it in NUM_ITERATION]
+    plot_data(paper, cmaes_stages, y_label,
+              title, xticks, xticklabels, ex_file)
+
+
+def plot_data(paper, cmaes_stages, y_label, title, xticks, xticklabels, ex_file):
     paper_avg, paper_stdev = paper
     cmaes_stages_avg, cmaes_stages_stdev = cmaes_stages
-    cmaes_prop_avg, cmaes_prop_stdev = cmaes_prop
 
     num_stages = len(paper_avg)
     stages = np.arange(num_stages)
@@ -170,14 +208,11 @@ def plot_data(paper, cmaes_stages, cmaes_prop, y_label, title, ex_file):
     ax.bar(stages, cmaes_stages_avg,
            width, yerr=cmaes_stages_stdev, color="orange",
            error_kw={"capsize": 4}, label="cmaes_stages")
-    ax.bar(stages + width, cmaes_prop_avg,
-           width, yerr=cmaes_prop_stdev, color="darkorange",
-           error_kw={"capsize": 4}, label="cmaes_prop")
 
     ax.set_ylabel(y_label)
     ax.set_title(title)
-    ax.set_xticks(stages)
-    ax.set_xticklabels(["stage {}".format(i) for i in stages])
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
     ax.legend()
 
     fig.tight_layout()
