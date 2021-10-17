@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from modeldot_autodot_cmaes import tune
+from quantum_autodot_cmaes import tune
 from datetime import date
 from statistics import stdev
 from pathlib import Path
