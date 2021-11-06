@@ -175,7 +175,6 @@ def evaluate_average_iter(data, x_items):
         sublist = np.array([])
         for d in data:
             sublist = np.concatenate((sublist, np.array(d[(x_items*i):(x_items*(i+1))])))
-        print(sublist)
         err.append(np.std(sublist))
         avg.append(np.average(sublist))
         
@@ -192,7 +191,6 @@ def plot_error_tube(paper, cmaes_stage, num_iteration, ex_file):
     fig, ax = plt.subplots()
     ax.plot(paper_step, paper_avg, '-', label="paper_sampler")
     ax.plot(cmaes_stage_step, cmaes_stage_avg, '-', label="cmaes_stages")
-
     ax.fill_between(paper_step, paper_avg - paper_err, paper_avg + paper_err, alpha=0.2)
     ax.fill_between(cmaes_stage_step, cmaes_stage_avg - cmaes_stage_err, cmaes_stage_avg + cmaes_stage_err, alpha=0.2)
     ax.set_ylabel("Value of score function")
