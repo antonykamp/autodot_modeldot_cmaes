@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from quantum_autodot_cmaes import tune
+from modeldot_autodot_cmaes import tune_with_modeldot
 from datetime import date
 from statistics import stdev
 from pathlib import Path
@@ -15,11 +15,12 @@ def run_tests():
     Path(DATE).mkdir(exist_ok=True)
     Path(DATE + "/errors").mkdir(exist_ok=True)
     paper, cmaes_stages = collect_data(max(NUM_ITERATION))
+    score_function_course(paper, cmaes_stages, max(NUM_ITERATION))
     comp = [compare_sampler(num_iter,
                             select_first_n_values(paper, num_iter),
                             select_first_n_values(cmaes_stages, num_iter))
             for num_iter in NUM_ITERATION]
-
+    
     compare_iterations(comp)
 
 
@@ -33,6 +34,8 @@ def collect_data(num_iterations, popsize=10):
 
 
 def compare_sampler(num_iterations, paper, cmaes_stages):
+    
+
     paper_avg = evaluate_average(paper)
     cmaes_stages_avg = evaluate_average(cmaes_stages)
     plot_stage_compare(paper_avg,
@@ -62,14 +65,14 @@ def save_tuning(**kwargs):
     filename = "{}/{}{}.csv".format(DATE,
                                     kwargs["sampler"], kwargs.get("score_function", ""))
     if Path(filename).exists():
-        data = np.loadtxt(filename, delimiter=';', dtype="i", ndmin=2)
+        data = np.loadtxt(filename, delimiter=',', dtype="i", ndmin=2)
     i = -1
-    while len(data) != 100:
+    while len(data) != 200:
         i = i + 1
         print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(
             kwargs["sampler"], i, len(data)))
         try:
-            res, _ = tune(**kwargs)
+            res, _ = tune_with_modeldot(**kwargs)
         except Exception as err:
             f = open(
                 DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
@@ -86,6 +89,11 @@ def save_tuning(**kwargs):
             np.savetxt(filename, data, delimiter=",", fmt="%i")
     return data
 
+
+def score_function_course(paper, cmaes_stages, num_iter):
+    paper_avg_10 = evaluate_average_iter(paper, 10)
+    cmaes_stage_avg_10 = evaluate_average_iter(cmaes_stages, 10)
+    plot_error_tube(paper_avg_10, cmaes_stage_avg_10, num_iter, "{}/avg_stage_tube_{}.png".format(DATE, num_iter))
 
 def select_first_n_values(data, n):
     num_stages = max(data[0])
@@ -159,6 +167,43 @@ def plot_stage_compare(paper, cmaes_stages, y_label, title, ex_file):
     plot_data(paper, cmaes_stages, y_label,
               title, xticks, xticklabels, ex_file)
 
+
+def evaluate_average_iter(data, x_items):
+    err = list()
+    avg = list()
+    for i in range(int(len(data[0])/x_items)):
+        sublist = np.array([])
+        for d in data:
+            sublist = np.concatenate((sublist, np.array(d[(x_items*i):(x_items*(i+1))])))
+        print(sublist)
+        err.append(np.std(sublist))
+        avg.append(np.average(sublist))
+        
+    return np.array(avg), np.array(err)
+
+
+def plot_error_tube(paper, cmaes_stage, num_iteration, ex_file):
+    paper_avg, paper_err = paper
+    paper_step = range(0, num_iteration, int(num_iteration/len(paper_avg)))
+    cmaes_stage_avg, cmaes_stage_err = cmaes_stage
+    cmaes_stage_step = range(0, num_iteration, int(num_iteration/len(cmaes_stage_avg)))
+    
+    print(cmaes_stage_step)
+    fig, ax = plt.subplots()
+    ax.plot(paper_step, paper_avg, '-', label="paper_sampler")
+    ax.plot(cmaes_stage_step, cmaes_stage_avg, '-', label="cmaes_stages")
+
+    ax.fill_between(paper_step, paper_avg - paper_err, paper_avg + paper_err, alpha=0.2)
+    ax.fill_between(cmaes_stage_step, cmaes_stage_avg - cmaes_stage_err, cmaes_stage_avg + cmaes_stage_err, alpha=0.2)
+    ax.set_ylabel("Value of score function")
+    ax.set_title("Course of score function")
+    ax.set_xticks(cmaes_stage_step)
+    ax.set_xticklabels(cmaes_stage_step)
+    ax.legend()
+
+    fig.tight_layout()
+    fig.savefig(ex_file)
+    
 
 def compare_iterations(comp):
     paper_avg = [it["paper_avg"] for it in comp]
