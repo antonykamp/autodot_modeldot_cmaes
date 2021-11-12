@@ -26,10 +26,12 @@ def run_tests():
     cmaes_stages_passed_to_eval_list = list()
 
     for num_iter in NUM_ITERATION:
-
+        
+        # Just use first num_iter iterations to "simulate" a tuning-process with less iterations
         num_iter_values_paper = select_first_n_values(paper, num_iter)
         num_iter_values_cmaes_stages = select_first_n_values(cmaes_stages, num_iter)
 
+        # Compare the samplers by detected points in a stage
         paper_avg, cmaes_stages_avg = average_sampler(num_iter_values_paper, num_iter_values_cmaes_stages, num_iter)
         paper_passed_to_eval, cmaes_stages_passed_to_eval = passed_to_eval_sampler(num_iter_values_paper, num_iter_values_cmaes_stages, num_iter)
 
@@ -41,8 +43,11 @@ def run_tests():
 
     num_stages = len(paper_avg_list[0][0])
 
+    # Compare the samplers by number of detected points of a stage during a number of iterations
     average_iterations(num_stages, paper_avg_list, cmaes_stages_avg_list)
     passed_to_eval_iterations(num_stages, paper_passed_to_eval_list, cmaes_stages_passed_to_eval_list)
+
+    # Compare the course of the scorefunction values of the sampler
     course_score_function(paper, cmaes_stages, max(NUM_ITERATION))
 
 
