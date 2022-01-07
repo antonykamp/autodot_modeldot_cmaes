@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
-import matplotlib
+import glob
+import sys
 import matplotlib.pyplot as plt
 
 def get_time_of_first_point(pickle_data):
@@ -59,10 +60,10 @@ def get_t_and_mu(files):
     avg_mu_paper = sum(mu)/len(mu)
     return avg_t_paper, avg_mu_paper
 
-FILES_PAPER = ["2021-12-18/Paper_sampler_i_0/tuning.pkl", "2021-12-18/Paper_sampler_i_1/tuning.pkl", "2021-12-18/Paper_sampler_i_2/tuning.pkl", "2021-12-18/Paper_sampler_i_3/tuning.pkl", "2021-12-18/Paper_sampler_i_4/tuning.pkl"]
-FILES_CMAES = ["2021-12-18/CMAES_sampler_i_0/tuning.pkl", "2021-12-18/CMAES_sampler_i_1/tuning.pkl", "2021-12-18/CMAES_sampler_i_2/tuning.pkl", "2021-12-18/CMAES_sampler_i_3/tuning.pkl", "2021-12-18/CMAES_sampler_i_4/tuning.pkl"]
-
 if __name__ == "__main__":
-    avg_t_paper, avg_mu_paper = get_t_and_mu(FILES_PAPER)
-    avg_t_cmaes, avg_mu_cmaes = get_t_and_mu(FILES_CMAES)
+    date = sys.argv[1]
+    files_paper = glob.glob('{}/Paper_sampler_i_*/tuning.pkl'.format(date))
+    files_cmaes = glob.glob('{}/CMAES_Sampler_i_*/tuning.pkl'.format(date))
+    avg_t_paper, avg_mu_paper = get_t_and_mu(files_paper)
+    avg_t_cmaes, avg_mu_cmaes = get_t_and_mu(files_cmaes)
     plot(avg_t_paper, avg_t_cmaes, avg_mu_paper, avg_mu_cmaes)
