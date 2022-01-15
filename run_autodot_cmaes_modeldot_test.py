@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 import traceback
 import matplotlib
+import sys
+
 matplotlib.use('Agg')
 DATE = str(date.today())
 NUM_ITERATION = [40, 60, 80, 100, 120, 140, 160]
@@ -277,4 +279,6 @@ def plot_error_tube(paper, cmaes_stage, num_iteration, ex_file):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        DATE = sys.argv[1]
     run_tests()
