@@ -31,7 +31,7 @@ def any_true(trace, minc, maxc, configs, **kwags):
     pass
 
 
-def tune(num_iteration, sampler, score_function="score_nothing", popsize = 10):
+def tune(num_iteration, sampler, score_function="score_nothing", popsize = 5):
 
     template_config = {
         "plunger_gates": [1, 2],

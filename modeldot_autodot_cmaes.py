@@ -137,7 +137,7 @@ def any_true(trace, minc, maxc, configs, **kwags):
 
     return passed, passed, None
 
-def tune_with_mock(num_iteration, sampler, score_function="score_nothing", popsize=10):
+def tune_with_mock(num_iteration, sampler, score_function="score_nothing", popsize=5):
 
     template_config = {
         "playground": {

@@ -18,9 +18,10 @@ def run_tests():
     Path(DATE + "/errors").mkdir(exist_ok=True)
 
     paper = save_tuning(num_iteration=max(NUM_ITERATION), sampler="Paper_sampler")
-    cmaes_stages = save_tuning(num_iteration=int(max(NUM_ITERATION)/10),
+    cmaes_stages = save_tuning(num_iteration=int(max(NUM_ITERATION)/5),
                                sampler="CMAES_sampler",
-                               score_function="mock_count_stages")
+                               score_function="mock_count_stages",
+                               popsize=5)
 
     paper_avg_list = list()
     cmaes_stages_avg_list = list()
