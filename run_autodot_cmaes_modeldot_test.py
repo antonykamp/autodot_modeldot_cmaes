@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from modeldot_autodot_cmaes import tune_with_modeldot
+from mock_autodot_cmaes import tune
 from datetime import date
 from statistics import stdev
 from pathlib import Path
@@ -66,7 +66,7 @@ def save_tuning(**kwargs):
         print("! ! ! ! ! ! ! ! ! {}-iter{}-collected{}/100 ! ! ! ! ! ! ! !".format(
             kwargs["sampler"], i, len(data)))
         try:
-            res, _ = tune_with_modeldot(**kwargs)
+            res, _ = tune(**kwargs)
         except Exception as err:
             f = open(
                 DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
