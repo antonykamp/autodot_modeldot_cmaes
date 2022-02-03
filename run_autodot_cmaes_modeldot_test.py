@@ -68,6 +68,7 @@ def save_tuning(**kwargs):
         try:
             res, _ = tune(**kwargs)
         except Exception as err:
+            print("Error: {}".format(err))
             f = open(
                 DATE+"/errors/{}_{}.txt".format(str(kwargs).replace(":", ""), i), "w")
             f.write(str(err))
